@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DoaList from '../components/DoaList';
 
-// Function to get a random integer between min and max (inclusive)
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 function SearchBar({ searchTerm, setSearchTerm }) {

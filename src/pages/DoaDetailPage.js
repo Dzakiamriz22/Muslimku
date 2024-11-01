@@ -48,7 +48,7 @@ const DoaDetailPage = () => {
     }
 
     return (
-        <div className="max-w-3xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10">
+        <div className="max-w-3xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10 pb-24">
             <button 
                 onClick={handleBack} 
                 className="mb-6 px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-200"
