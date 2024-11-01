@@ -1,24 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SurahList from './pages/SurahList';
+import SurahDetail from './pages/SurahDetail';
+import PrayerTimes from './pages/PrayerTimes';
+import SurahMekah from './pages/SurahMekah'; 
+import SurahMadinah from './pages/SurahMadinah';
+import BottomNavigation from './components/BottomNavigation';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<SurahList />} />
+          <Route path="/surah/:id" element={<SurahDetail />} />
+          <Route path="/prayer-times" element={<PrayerTimes />} />
+          <Route path="/mekah" element={<SurahMekah />} />
+          <Route path="/madinah" element={<SurahMadinah />} />
+        </Routes>
+        <BottomNavigation />
+      </div>
+    </Router>
   );
 }
 
