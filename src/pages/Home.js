@@ -98,7 +98,7 @@ function Home() {
   return (
     <div className="w-full max-w-5xl mx-auto p-6 bg-gradient-to-r from-green-50 to-white rounded-lg shadow-lg mb-20">
       <h1 className="text-4xl font-bold text-center mb-4 text-green-700">Muslimku</h1>
-      <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Daftar Surah</h2>
+      <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Al-Quran</h2>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <PrayerTimes setNextWajibPrayer={setNextWajibPrayer} />
       {nextWajibPrayer && (

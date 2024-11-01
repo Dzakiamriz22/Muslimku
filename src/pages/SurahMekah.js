@@ -43,7 +43,7 @@ function SurahMekah() {
   return (
     <div className="w-full max-w-5xl mx-auto p-6 bg-gradient-to-r from-green-50 to-white rounded-md shadow-lg mb-20">
       <h1 className="text-4xl font-bold text-center mb-4 text-green-700">Muslimku</h1>
-      <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Surah Mekah</h2>
+      <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Surat Makkiyah</h2>
       <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {filteredSurahs.length === 0 && searchTerm ? (
