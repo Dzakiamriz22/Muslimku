@@ -116,7 +116,7 @@ function PrayerTimes() {
           Countdown to {nextWajibPrayer}: <span className="text-green-500">{countdown}</span>
         </h3>
         
-        <h3 className="font-semibold mt-4">Wajib:</h3>
+        <h3 className="font-semibold mt-4">Jadwal Sholat:</h3>
         <ul className="space-y-2 mt-2">
           {wajibPrayers.map((prayer) => (
             <li key={prayer} className="bg-green-100 p-3 rounded-lg flex justify-between items-center shadow">

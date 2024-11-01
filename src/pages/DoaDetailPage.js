@@ -51,7 +51,7 @@ const DoaDetailPage = () => {
         <div className="max-w-3xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10">
             <button 
                 onClick={handleBack} 
-                className="mb-6 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-200"
+                className="mb-6 px-4 py-2 text-white bg-green-600 rounded-md hover:bg-green-700 transition duration-200"
                 aria-label="Back"
             >
                 <span className="mr-2">&larr;</span> Kembali
