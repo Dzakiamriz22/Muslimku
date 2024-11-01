@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaHome, FaPray, FaMosque } from 'react-icons/fa';
+import { FaHome, FaPray, FaMosque, FaBook } from 'react-icons/fa'; 
 
 function BottomNavigation() {
   return (
@@ -21,6 +21,12 @@ function BottomNavigation() {
           <Link to="/madinah" className="flex flex-col items-center hover:text-yellow-400 transition duration-200">
             <FaMosque className="text-2xl" />
             <span className="text-sm">Surah Madinah</span>
+          </Link>
+        </li>
+        <li className="flex-1 text-center">
+          <Link to="/doa" className="flex flex-col items-center hover:text-yellow-400 transition duration-200">
+            <FaBook className="text-2xl" /> {/* Changed to FaBook for DOA */}
+            <span className="text-sm">DOA</span>
           </Link>
         </li>
         <li className="flex-1 text-center">

@@ -51,7 +51,7 @@ function SurahDetail() {
               {/* Generate options from 1 to jumlah_ayat */}
               {Array.from({ length: surah.jumlah_ayat }, (_, index) => (
                 <option key={index + 1} value={index + 1}>
-                  Ayah {index + 1}
+                  Ayat {index + 1}
                 </option>
               ))}
             </select>
