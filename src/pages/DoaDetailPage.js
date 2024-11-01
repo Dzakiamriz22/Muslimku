@@ -29,7 +29,7 @@ const DoaDetailPage = () => {
     }, [id]);
 
     const handleBack = () => {
-        navigate(-1); // Go back to the previous page
+        navigate(-1);
     };
 
     const handleCopy = () => {
@@ -39,7 +39,7 @@ const DoaDetailPage = () => {
     };
 
     if (loading) {
-        return <div className="flex justify-center items-center h-screen text-lg font-semibold">Loading...</div>;
+        return <div className="flex justify-center items-center h-screen text-lg">Loading...</div>;
     }
 
     if (error) {
@@ -47,27 +47,28 @@ const DoaDetailPage = () => {
     }
 
     return (
-        <div className="max-w-3xl mx-auto p-6 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg shadow-lg">
+        <div className="max-w-3xl mx-auto p-6 pb-24 bg-gradient-to-r from-green-100 to-blue-100 rounded-lg shadow-lg">
             <button 
                 onClick={handleBack} 
-                className="mb-4 text-blue-600 hover:underline"
+                className="mb-4 px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 transition duration-200 flex items-center"
+                aria-label="Back"
             >
-                &larr; Back
+                <span className="mr-2">&larr;</span> Kembali
             </button>
-            <h1 className="text-5xl font-bold text-center mb-6 text-gray-800">{doa.judul}</h1>
+            <h1 className="text-4xl font-bold text-center mb-4 text-gray-800">{doa.judul}</h1>
             <div className="flex justify-center items-center mb-4">
-                <p className="text-4xl arabic-font border p-2 bg-white rounded shadow-lg transition-transform transform hover:scale-105">
+                <p className="text-4xl arabic-font border p-2 bg-white rounded shadow-lg">
                     {doa.arab}
                 </p>
                 <button 
                     onClick={handleCopy} 
-                    className="ml-4 p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="ml-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     aria-label="Copy Arabic text"
                 >
                     <FaCopy />
                 </button>
             </div>
-            <p className="text-2xl italic text-center text-gray-700 mb-4">{doa.latin}</p>
+            <p className="text-xl italic text-center text-gray-700 mb-2">{doa.latin}</p>
             <p className="text-lg text-gray-800 bg-gray-50 p-4 rounded shadow-sm">{doa.terjemah}</p>
         </div>
     );
