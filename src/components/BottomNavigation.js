@@ -9,7 +9,7 @@ function BottomNavigation() {
     { to: "/mekah", icon: <FaMosque className="text-2xl" />, label: "Makkiyah" },
     { to: "/madinah", icon: <FaMosque className="text-2xl" />, label: "Madaniyah" },
     { to: "/doa", icon: <FaBook className="text-2xl" />, label: "Doa" },
-    { to: "/prayer-times", icon: <FaPray className="text-2xl" />, label: "Waktu Sholat" },
+    { to: "/prayer-times", icon: <FaPray className="text-2xl" />, label: "Sholat" },
   ];
 
   return (
