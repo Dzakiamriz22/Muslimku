@@ -11,9 +11,6 @@ function PrayerTimes() {
   const [calibratedQiblaDirection, setCalibratedQiblaDirection] = useState(0); // Store calibrated direction
   const [deviceOrientation, setDeviceOrientation] = useState(0); // Store device orientation
 
-  const kaabaLatitude = 21.4253; // Latitude of Kaaba
-  const kaabaLongitude = 39.8262; // Longitude of Kaaba
-
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
       if (navigator.geolocation) {
@@ -26,7 +23,7 @@ function PrayerTimes() {
             setLoading(false);
             calculateNextWajibPrayer(data.data.timings);
             await fetchLocationName(latitude, longitude);
-            calculateQiblaDirection(latitude, longitude);
+            fetchQiblaDirection(latitude, longitude);
           } catch (err) {
             setError('Error fetching prayer times. Please try again later.');
             setLoading(false);
@@ -50,6 +47,16 @@ function PrayerTimes() {
         setLocation(city);
       } catch (err) {
         setError('Error fetching location name.');
+      }
+    };
+
+    const fetchQiblaDirection = async (latitude, longitude) => {
+      try {
+        const response = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
+        const data = await response.json();
+        setQiblaDirection(data.data.direction); // Set Qibla direction from API response
+      } catch (err) {
+        setError('Error fetching Qibla direction.');
       }
     };
 
@@ -106,22 +113,6 @@ function PrayerTimes() {
       }, 1000);
 
       return () => clearInterval(interval);
-    };
-
-    const calculateQiblaDirection = (latitude, longitude) => {
-      const toRadians = (degrees) => degrees * (Math.PI / 180);
-
-      const lat1 = toRadians(latitude);
-      const lon1 = toRadians(longitude);
-      const lat2 = toRadians(kaabaLatitude);
-      const lon2 = toRadians(kaabaLongitude);
-
-      const deltaLon = lon2 - lon1;
-      const y = Math.sin(deltaLon) * Math.cos(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
-      const qiblaBearing = Math.atan2(y, x) * (180 / Math.PI);
-
-      setQiblaDirection((qiblaBearing + 360) % 360); // Normalize to 0-360
     };
 
     const handleDeviceOrientation = (event) => {
