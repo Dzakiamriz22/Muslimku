@@ -10,6 +10,9 @@ function PrayerTimes() {
   const [qiblaDirection, setQiblaDirection] = useState(0);
   const [deviceOrientation, setDeviceOrientation] = useState(0);
 
+  const kaabaLatitude = 21.4253; // Latitude of Kaaba
+  const kaabaLongitude = 39.8262; // Longitude of Kaaba
+
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
       if (navigator.geolocation) {
@@ -105,9 +108,6 @@ function PrayerTimes() {
     };
 
     const calculateQiblaDirection = (latitude, longitude) => {
-      const kaabaLatitude = 21.4225; // Qibla Latitude
-      const kaabaLongitude = 39.8262; // Qibla Longitude
-
       const deltaLongitude = kaabaLongitude - longitude;
       const x = Math.cos((latitude * Math.PI) / 180) * Math.sin((deltaLongitude * Math.PI) / 180);
       const y = Math.cos((kaabaLatitude * Math.PI) / 180) * Math.sin((latitude * Math.PI) / 180) - 
@@ -134,8 +134,8 @@ function PrayerTimes() {
     };
   }, []);
 
-  // Correcting the Qibla direction adjustment
-  const adjustedQiblaDirection = (qiblaDirection + deviceOrientation + 360) % 360;
+  // Adjust the Qibla direction based on device orientation
+  const adjustedQiblaDirection = (qiblaDirection - deviceOrientation + 360) % 360;
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
