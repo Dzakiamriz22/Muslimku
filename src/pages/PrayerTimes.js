@@ -105,8 +105,8 @@ function PrayerTimes() {
     };
 
     const calculateQiblaDirection = (latitude, longitude) => {
-      const kaabaLatitude = 21.4225;
-      const kaabaLongitude = 39.8262;
+      const kaabaLatitude = 21.4225; // Qibla Latitude
+      const kaabaLongitude = 39.8262; // Qibla Longitude
 
       const deltaLongitude = kaabaLongitude - longitude;
       const x = Math.cos((latitude * Math.PI) / 180) * Math.sin((deltaLongitude * Math.PI) / 180);
@@ -115,7 +115,7 @@ function PrayerTimes() {
                 Math.cos((deltaLongitude * Math.PI) / 180);
 
       const qiblaBearing = Math.atan2(x, y) * (180 / Math.PI);
-      setQiblaDirection((qiblaBearing + 360) % 360);
+      setQiblaDirection((qiblaBearing + 360) % 360); // Normalize to 0-360
     };
 
     getLocationAndFetchPrayerTimes();
@@ -134,7 +134,8 @@ function PrayerTimes() {
     };
   }, []);
 
-  const adjustedQiblaDirection = (qiblaDirection - deviceOrientation + 360) % 360;
+  // Correcting the Qibla direction adjustment
+  const adjustedQiblaDirection = (qiblaDirection + deviceOrientation + 360) % 360;
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
