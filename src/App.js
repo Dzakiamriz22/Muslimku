@@ -1,3 +1,4 @@
+// src/App.js
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SurahList from './pages/Home';
 import SurahDetail from './pages/SurahDetail';
@@ -7,6 +8,7 @@ import SurahMadinah from './pages/SurahMadinah';
 import BottomNavigation from './components/BottomNavigation';
 import DoaPage from './pages/DoaPage';
 import DoaDetailPage from './pages/DoaDetailPage';
+import ProfilePage from './pages/ProfilePage'; // Import the ProfilePage
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
           <Route path="/madinah" element={<SurahMadinah />} />
           <Route path="/doa" element={<DoaPage />} />
           <Route path="/doa/:id" element={<DoaDetailPage />} />
+          <Route path="/profile" element={<ProfilePage />} /> 
         </Routes>
         <BottomNavigation />
       </div>

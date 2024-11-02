@@ -158,3 +158,4 @@ function PrayerTimes() {
 }
 
 export default PrayerTimes;
+  

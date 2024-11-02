@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DoaList from '../components/DoaList';
+import ProfileButton from '../components/ProfileButton';
+
 
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -48,10 +50,10 @@ function PrayerTimes({ setNextWajibPrayer }) {
       let nextPrayerName = '';
       let nextPrayerTime = '';
 
-      for (let i = 0; i < wajibPrayers.length; i++) {
-        if (timings[wajibPrayers[i]] > currentTime) {
-          nextPrayerName = wajibPrayers[i];
-          nextPrayerTime = timings[wajibPrayers[i]];
+      for (const prayer of wajibPrayers) {
+        if (timings[prayer] > currentTime) {
+          nextPrayerName = prayer;
+          nextPrayerTime = timings[prayer];
           break;
         }
       }
@@ -94,29 +96,34 @@ function Home() {
   const [surahDetails, setSurahDetails] = useState({ name: '', number: '' });
 
   useEffect(() => {
-    fetch('https://quran-api.santrikoding.com/api/surah')
-      .then((res) => res.json())
-      .then((data) => {
-        const filteredData = location.pathname === '/madinah'
-          ? data.filter(surah => surah.tempat_turun === 'madinah')
-          : location.pathname === '/mekkah'
-          ? data.filter(surah => surah.tempat_turun === 'mekkah')
-          : data;
+    const fetchSurahs = async () => {
+      const response = await fetch('https://quran-api.santrikoding.com/api/surah');
+      const data = await response.json();
 
-        setSurahs(filteredData);
+      const filteredData = location.pathname === '/madinah'
+        ? data.filter(surah => surah.tempat_turun === 'madinah')
+        : location.pathname === '/mekkah'
+        ? data.filter(surah => surah.tempat_turun === 'mekkah')
+        : data;
 
-        const randomSurahId = getRandomInt(1, filteredData.length);
-        fetch(`https://quran-api.santrikoding.com/api/surah/${randomSurahId}`)
-          .then((res) => res.json())
-          .then((surahData) => {
-            if (surahData.ayat && surahData.ayat.length > 0) {
-              const randomVerseIndex = getRandomInt(0, surahData.ayat.length - 1);
-              const randomVerse = surahData.ayat[randomVerseIndex];
-              setVerseOfTheDay({ text: randomVerse.idn, translation: randomVerse.tr });
-              setSurahDetails({ name: surahData.nama_latin, number: randomVerse.nomor });
-            }
-          });
-      });
+      setSurahs(filteredData);
+      fetchRandomVerse(filteredData);
+    };
+
+    const fetchRandomVerse = async (filteredData) => {
+      const randomSurahId = getRandomInt(1, filteredData.length);
+      const response = await fetch(`https://quran-api.santrikoding.com/api/surah/${randomSurahId}`);
+      const surahData = await response.json();
+
+      if (surahData.ayat && surahData.ayat.length > 0) {
+        const randomVerseIndex = getRandomInt(0, surahData.ayat.length - 1);
+        const randomVerse = surahData.ayat[randomVerseIndex];
+        setVerseOfTheDay({ text: randomVerse.idn, translation: randomVerse.tr });
+        setSurahDetails({ name: surahData.nama_latin, number: randomVerse.nomor });
+      }
+    };
+
+    fetchSurahs();
   }, [location]);
 
   const filteredSurahs = surahs.filter(surah =>
@@ -167,6 +174,8 @@ function Home() {
           </Link>
         ))}
       </div>
+
+      <ProfileButton /> {/* Add the ProfileButton here */}
     </div>
   );
 }
