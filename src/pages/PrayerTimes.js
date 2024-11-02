@@ -108,13 +108,19 @@ function PrayerTimes() {
     };
 
     const calculateQiblaDirection = (latitude, longitude) => {
-      const deltaLongitude = kaabaLongitude - longitude;
-      const x = Math.cos((latitude * Math.PI) / 180) * Math.sin((deltaLongitude * Math.PI) / 180);
-      const y = Math.cos((kaabaLatitude * Math.PI) / 180) * Math.sin((latitude * Math.PI) / 180) - 
-                Math.sin((kaabaLatitude * Math.PI) / 180) * Math.cos((latitude * Math.PI) / 180) * 
-                Math.cos((deltaLongitude * Math.PI) / 180);
+      // Haversine Formula to calculate Qibla Bearing
+      const toRadians = (degrees) => degrees * (Math.PI / 180);
 
-      const qiblaBearing = Math.atan2(x, y) * (180 / Math.PI);
+      const lat1 = toRadians(latitude);
+      const lon1 = toRadians(longitude);
+      const lat2 = toRadians(kaabaLatitude);
+      const lon2 = toRadians(kaabaLongitude);
+
+      const deltaLon = lon2 - lon1;
+      const y = Math.sin(deltaLon) * Math.cos(lat2);
+      const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(deltaLon);
+      const qiblaBearing = Math.atan2(y, x) * (180 / Math.PI);
+
       setQiblaDirection((qiblaBearing + 360) % 360); // Normalize to 0-360
     };
 
