@@ -8,8 +8,7 @@ function PrayerTimes() {
   const [countdown, setCountdown] = useState('');
   const [location, setLocation] = useState('');
   const [qiblaDirection, setQiblaDirection] = useState(0);
-  const [calibratedQiblaDirection, setCalibratedQiblaDirection] = useState(0); // Store calibrated direction
-  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store device orientation
+  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store real-time device orientation
 
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
@@ -17,15 +16,20 @@ function PrayerTimes() {
         navigator.geolocation.getCurrentPosition(async (position) => {
           const { latitude, longitude } = position.coords;
           try {
+            // Fetch prayer times
             const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`);
             const data = await response.json();
             setPrayerTimes(data.data.timings);
             setLoading(false);
             calculateNextWajibPrayer(data.data.timings);
             await fetchLocationName(latitude, longitude);
-            fetchQiblaDirection(latitude, longitude);
+
+            // Fetch Qibla direction
+            const qiblaResponse = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
+            const qiblaData = await qiblaResponse.json();
+            setQiblaDirection(qiblaData.data.direction); // Set Qibla direction from API response
           } catch (err) {
-            setError('Error fetching prayer times. Please try again later.');
+            setError('Error fetching prayer times or Qibla direction. Please try again later.');
             setLoading(false);
           }
         }, () => {
@@ -47,16 +51,6 @@ function PrayerTimes() {
         setLocation(city);
       } catch (err) {
         setError('Error fetching location name.');
-      }
-    };
-
-    const fetchQiblaDirection = async (latitude, longitude) => {
-      try {
-        const response = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
-        const data = await response.json();
-        setQiblaDirection(data.data.direction); // Set Qibla direction from API response
-      } catch (err) {
-        setError('Error fetching Qibla direction.');
       }
     };
 
@@ -116,20 +110,17 @@ function PrayerTimes() {
     };
 
     const handleDeviceOrientation = (event) => {
-      const heading = event.alpha;
-      setDeviceOrientation(heading);
+      setDeviceOrientation(event.alpha || 0);
     };
 
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-
+    // Fetch initial data
     getLocationAndFetchPrayerTimes();
+
+    // Add device orientation event listener
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
 
     return () => window.removeEventListener('deviceorientation', handleDeviceOrientation);
   }, []);
-
-  const handleCalibration = () => {
-    setCalibratedQiblaDirection((qiblaDirection - deviceOrientation + 360) % 360); // Calibrate based on device orientation
-  };
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
@@ -140,7 +131,7 @@ function PrayerTimes() {
     <div className="max-w-md mx-auto p-4 pb-20">
       <h1 className="text-3xl font-bold text-center mb-6 text-green-600">Jadwal Waktu Sholat</h1>
       <h2 className="text-xl font-semibold text-center mb-4">Current Location: {location || 'Fetching location...'}</h2>
-      
+
       {/* Qibla direction section at the top */}
       <div className="flex flex-col items-center mb-6">
         <h3 className="font-semibold mb-2">Kiblat Direction</h3>
@@ -149,12 +140,9 @@ function PrayerTimes() {
             src="/compass.png"
             alt="Compass"
             className="w-24 h-24"
-            style={{ transform: `rotate(${calibratedQiblaDirection}deg)`, transition: 'transform 0.5s' }}
+            style={{ transform: `rotate(${(qiblaDirection - deviceOrientation + 360) % 360}deg)`, transition: 'transform 0.5s' }}
           />
         </div>
-        <button onClick={handleCalibration} className="mt-2 p-2 bg-green-500 text-white rounded">
-          Cari arah Kiblat
-        </button>
       </div>
 
       <div className="bg-white shadow-lg rounded-lg p-6">
@@ -162,7 +150,7 @@ function PrayerTimes() {
         <h3 className="text-lg font-medium mb-2">
           Countdown to {nextWajibPrayer}: <span className="text-green-500 font-bold">{countdown}</span>
         </h3>
-        
+
         <h3 className="font-semibold mt-4">Jadwal Sholat:</h3>
         <ul className="space-y-2 mt-2">
           {wajibPrayers.map((prayer) => (
