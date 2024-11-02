@@ -9,6 +9,7 @@ function PrayerTimes() {
   const [location, setLocation] = useState('');
   const [qiblaDirection, setQiblaDirection] = useState(0);
   const [calibratedQiblaDirection, setCalibratedQiblaDirection] = useState(0); // Store calibrated direction
+  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store device orientation
 
   const kaabaLatitude = 21.4253; // Latitude of Kaaba
   const kaabaLongitude = 39.8262; // Longitude of Kaaba
@@ -123,11 +124,20 @@ function PrayerTimes() {
       setQiblaDirection((qiblaBearing + 360) % 360); // Normalize to 0-360
     };
 
+    const handleDeviceOrientation = (event) => {
+      const heading = event.alpha;
+      setDeviceOrientation(heading);
+    };
+
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+
     getLocationAndFetchPrayerTimes();
+
+    return () => window.removeEventListener('deviceorientation', handleDeviceOrientation);
   }, []);
 
   const handleCalibration = () => {
-    setCalibratedQiblaDirection(qiblaDirection); // Set the calibrated direction
+    setCalibratedQiblaDirection((qiblaDirection - deviceOrientation + 360) % 360); // Calibrate based on device orientation
   };
 
   if (loading) return <p className="text-center">Loading...</p>;
@@ -152,7 +162,7 @@ function PrayerTimes() {
           />
         </div>
         <button onClick={handleCalibration} className="mt-2 p-2 bg-green-500 text-white rounded">
-          Calibrate Compass
+          Cari arah Kiblat
         </button>
       </div>
 
