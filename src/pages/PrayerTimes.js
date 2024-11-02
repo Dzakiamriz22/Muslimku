@@ -7,8 +7,6 @@ function PrayerTimes() {
   const [nextWajibPrayer, setNextWajibPrayer] = useState('');
   const [countdown, setCountdown] = useState('');
   const [location, setLocation] = useState('');
-  const [qiblaDirection, setQiblaDirection] = useState(0);
-  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store device orientation for real-time Qibla direction
 
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
@@ -25,13 +23,8 @@ function PrayerTimes() {
               setLoading(false);
               calculateNextWajibPrayer(data.data.timings);
               await fetchLocationName(latitude, longitude);
-
-              // Fetch Qibla direction
-              const qiblaResponse = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
-              const qiblaData = await qiblaResponse.json();
-              setQiblaDirection(qiblaData.data.direction);
             } catch (err) {
-              setError('Error fetching prayer times or Qibla direction. Please try again later.');
+              setError('Error fetching prayer times. Please try again later.');
               setLoading(false);
             }
           },
@@ -39,7 +32,7 @@ function PrayerTimes() {
             // Handle geolocation errors
             switch (error.code) {
               case error.PERMISSION_DENIED:
-                setError('Location access denied. Please enable location access for accurate prayer times and Qibla direction.');
+                setError('Location access denied. Please enable location access for accurate prayer times.');
                 break;
               case error.POSITION_UNAVAILABLE:
                 setError('Location information is unavailable.');
@@ -130,17 +123,8 @@ function PrayerTimes() {
       return () => clearInterval(interval);
     };
 
-    const handleDeviceOrientation = (event) => {
-      setDeviceOrientation(event.alpha || 0);
-    };
-
     // Fetch initial data
     getLocationAndFetchPrayerTimes();
-
-    // Add device orientation event listener
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-
-    return () => window.removeEventListener('deviceorientation', handleDeviceOrientation);
   }, []);
 
   if (loading) return <p className="text-center">Loading...</p>;
@@ -152,19 +136,6 @@ function PrayerTimes() {
     <div className="max-w-md mx-auto p-4 pb-20">
       <h1 className="text-3xl font-bold text-center mb-6 text-green-600">Jadwal Waktu Sholat</h1>
       <h2 className="text-xl font-semibold text-center mb-4">Current Location: {location || 'Fetching location...'}</h2>
-
-      {/* Qibla direction section at the top */}
-      <div className="flex flex-col items-center mb-6">
-        <h3 className="font-semibold mb-2">Kiblat Direction</h3>
-        <div className="relative mb-4">
-          <img
-            src="/compass.png"
-            alt="Compass"
-            className="w-24 h-24"
-            style={{ transform: `rotate(${(qiblaDirection - deviceOrientation + 360) % 360}deg)`, transition: 'transform 0.5s' }}
-          />
-        </div>
-      </div>
 
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Next Wajib Prayer: {nextWajibPrayer || 'No more prayers today'}</h2>
