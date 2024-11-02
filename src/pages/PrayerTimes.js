@@ -108,7 +108,6 @@ function PrayerTimes() {
     };
 
     const calculateQiblaDirection = (latitude, longitude) => {
-      // Haversine Formula to calculate Qibla Bearing
       const toRadians = (degrees) => degrees * (Math.PI / 180);
 
       const lat1 = toRadians(latitude);
@@ -129,7 +128,8 @@ function PrayerTimes() {
 
   useEffect(() => {
     const handleOrientation = (event) => {
-      const alpha = event.alpha;
+      // Adjust for various device orientations
+      const alpha = event.alpha !== null ? event.alpha : 0; // Ensure alpha is available
       setDeviceOrientation(alpha); // Store the device orientation
     };
 
@@ -141,7 +141,7 @@ function PrayerTimes() {
   }, []);
 
   // Adjust the Qibla direction based on device orientation
-  const adjustedQiblaDirection = (qiblaDirection - deviceOrientation + 360) % 360;
+  const adjustedQiblaDirection = (qiblaDirection + deviceOrientation + 360) % 360;
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
@@ -160,8 +160,8 @@ function PrayerTimes() {
           <img
             src="/compass.png"
             alt="Compass"
-            className="w-24 h-24" // Smaller compass
-            style={{ transform: `rotate(${adjustedQiblaDirection}deg)`, transition: 'transform 0.5s' }} // Adjusting with device orientation
+            className="w-24 h-24"
+            style={{ transform: `rotate(${adjustedQiblaDirection}deg)`, transition: 'transform 0.5s' }}
           />
         </div>
       </div>
