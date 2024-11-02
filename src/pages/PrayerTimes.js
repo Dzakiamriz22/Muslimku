@@ -8,34 +8,54 @@ function PrayerTimes() {
   const [countdown, setCountdown] = useState('');
   const [location, setLocation] = useState('');
   const [qiblaDirection, setQiblaDirection] = useState(0);
-  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store real-time device orientation
-
+  
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          const { latitude, longitude } = position.coords;
-          try {
-            // Fetch prayer times
-            const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`);
-            const data = await response.json();
-            setPrayerTimes(data.data.timings);
-            setLoading(false);
-            calculateNextWajibPrayer(data.data.timings);
-            await fetchLocationName(latitude, longitude);
+        // Request user's location
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords;
+            try {
+              // Fetch prayer times
+              const response = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=2`);
+              const data = await response.json();
+              setPrayerTimes(data.data.timings);
+              setLoading(false);
+              calculateNextWajibPrayer(data.data.timings);
+              await fetchLocationName(latitude, longitude);
 
-            // Fetch Qibla direction
-            const qiblaResponse = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
-            const qiblaData = await qiblaResponse.json();
-            setQiblaDirection(qiblaData.data.direction); // Set Qibla direction from API response
-          } catch (err) {
-            setError('Error fetching prayer times or Qibla direction. Please try again later.');
+              // Fetch Qibla direction
+              const qiblaResponse = await fetch(`https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`);
+              const qiblaData = await qiblaResponse.json();
+              setQiblaDirection(qiblaData.data.direction);
+            } catch (err) {
+              setError('Error fetching prayer times or Qibla direction. Please try again later.');
+              setLoading(false);
+            }
+          },
+          (error) => {
+            // Handle errors from getting location
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                setError('Location access denied. Please enable location access for accurate prayer times and Qibla direction.');
+                break;
+              case error.POSITION_UNAVAILABLE:
+                setError('Location information is unavailable.');
+                break;
+              case error.TIMEOUT:
+                setError('The request to get your location timed out.');
+                break;
+              case error.UNKNOWN_ERROR:
+                setError('An unknown error occurred.');
+                break;
+              default:
+                setError('An unexpected error occurred.'); // Added default case
+                break;
+            }
             setLoading(false);
           }
-        }, () => {
-          setError('Unable to retrieve your location.');
-          setLoading(false);
-        });
+        );
       } else {
         setError('Geolocation is not supported by this browser.');
         setLoading(false);
@@ -109,17 +129,8 @@ function PrayerTimes() {
       return () => clearInterval(interval);
     };
 
-    const handleDeviceOrientation = (event) => {
-      setDeviceOrientation(event.alpha || 0);
-    };
-
     // Fetch initial data
     getLocationAndFetchPrayerTimes();
-
-    // Add device orientation event listener
-    window.addEventListener('deviceorientation', handleDeviceOrientation);
-
-    return () => window.removeEventListener('deviceorientation', handleDeviceOrientation);
   }, []);
 
   if (loading) return <p className="text-center">Loading...</p>;
@@ -140,7 +151,7 @@ function PrayerTimes() {
             src="/compass.png"
             alt="Compass"
             className="w-24 h-24"
-            style={{ transform: `rotate(${(qiblaDirection - deviceOrientation + 360) % 360}deg)`, transition: 'transform 0.5s' }}
+            style={{ transform: `rotate(${qiblaDirection}deg)`, transition: 'transform 0.5s' }}
           />
         </div>
       </div>
