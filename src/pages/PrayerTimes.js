@@ -7,6 +7,8 @@ function PrayerTimes() {
   const [nextWajibPrayer, setNextWajibPrayer] = useState('');
   const [countdown, setCountdown] = useState('');
   const [location, setLocation] = useState('');
+  const [qiblaDirection, setQiblaDirection] = useState(0);
+  const [deviceOrientation, setDeviceOrientation] = useState(0);
 
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
@@ -20,10 +22,14 @@ function PrayerTimes() {
             setLoading(false);
             calculateNextWajibPrayer(data.data.timings);
             await fetchLocationName(latitude, longitude);
+            calculateQiblaDirection(latitude, longitude);
           } catch (err) {
-            setError('Error fetching prayer times');
+            setError('Error fetching prayer times. Please try again later.');
             setLoading(false);
           }
+        }, () => {
+          setError('Unable to retrieve your location.');
+          setLoading(false);
         });
       } else {
         setError('Geolocation is not supported by this browser.');
@@ -39,7 +45,7 @@ function PrayerTimes() {
         const city = addressComponents.city || addressComponents.town || addressComponents.village || 'Unknown Location';
         setLocation(city);
       } catch (err) {
-        setError('Error fetching location name');
+        setError('Error fetching location name.');
       }
     };
 
@@ -64,10 +70,10 @@ function PrayerTimes() {
       }
 
       setNextWajibPrayer(nextPrayerName);
-      calculateCountdown(nextPrayerTime, nextPrayerName);
+      calculateCountdown(nextPrayerTime);
     };
 
-    const calculateCountdown = (nextPrayerTime, prayerName) => {
+    const calculateCountdown = (nextPrayerTime) => {
       if (!nextPrayerTime) return;
 
       const now = new Date();
@@ -98,8 +104,37 @@ function PrayerTimes() {
       return () => clearInterval(interval);
     };
 
+    const calculateQiblaDirection = (latitude, longitude) => {
+      const kaabaLatitude = 21.4225;
+      const kaabaLongitude = 39.8262;
+
+      const deltaLongitude = kaabaLongitude - longitude;
+      const x = Math.cos((latitude * Math.PI) / 180) * Math.sin((deltaLongitude * Math.PI) / 180);
+      const y = Math.cos((kaabaLatitude * Math.PI) / 180) * Math.sin((latitude * Math.PI) / 180) - 
+                Math.sin((kaabaLatitude * Math.PI) / 180) * Math.cos((latitude * Math.PI) / 180) * 
+                Math.cos((deltaLongitude * Math.PI) / 180);
+
+      const qiblaBearing = Math.atan2(x, y) * (180 / Math.PI);
+      setQiblaDirection((qiblaBearing + 360) % 360);
+    };
+
     getLocationAndFetchPrayerTimes();
   }, []);
+
+  useEffect(() => {
+    const handleOrientation = (event) => {
+      const alpha = event.alpha;
+      setDeviceOrientation(alpha); // Store the device orientation
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    };
+  }, []);
+
+  const adjustedQiblaDirection = (qiblaDirection - deviceOrientation + 360) % 360;
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
@@ -110,10 +145,24 @@ function PrayerTimes() {
     <div className="max-w-md mx-auto p-4 pb-20">
       <h1 className="text-3xl font-bold text-center mb-6 text-green-600">Jadwal Waktu Sholat</h1>
       <h2 className="text-xl font-semibold text-center mb-4">Current Location: {location || 'Fetching location...'}</h2>
+      
+      {/* Qibla direction section at the top */}
+      <div className="flex flex-col items-center mb-6">
+        <h3 className="font-semibold mb-2">Kiblat Direction</h3>
+        <div className="relative mb-4">
+          <img
+            src="/compass.png"
+            alt="Compass"
+            className="w-24 h-24" // Smaller compass
+            style={{ transform: `rotate(${adjustedQiblaDirection}deg)`, transition: 'transform 0.5s' }} // Adjusting with device orientation
+          />
+        </div>
+      </div>
+
       <div className="bg-white shadow-lg rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">Next Wajib Prayer: {nextWajibPrayer || 'No more prayers today'}</h2>
         <h3 className="text-lg font-medium mb-2">
-          Countdown to {nextWajibPrayer}: <span className="text-green-500">{countdown}</span>
+          Countdown to {nextWajibPrayer}: <span className="text-green-500 font-bold">{countdown}</span>
         </h3>
         
         <h3 className="font-semibold mt-4">Jadwal Sholat:</h3>
