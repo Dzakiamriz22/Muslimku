@@ -1,25 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaGithub, FaMapMarkerAlt, FaStar, FaCodeBranch, FaArrowLeft, FaMoon, FaSun } from 'react-icons/fa';
+import { FaGithub, FaMapMarkerAlt, FaArrowLeft, FaMoon, FaSun, FaInstagram, FaLinkedin } from 'react-icons/fa';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
-  const [repos, setRepos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
+  const [skills, setSkills] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchGitHubData = async () => {
       try {
         const profileResponse = await fetch('https://api.github.com/users/Dzakiamriz22');
+        if (!profileResponse.ok) throw new Error('Network response was not ok');
         const profileData = await profileResponse.json();
         setProfile(profileData);
 
-        const reposResponse = await fetch('https://api.github.com/users/Dzakiamriz22/repos');
+        // Fetch repositories to get languages used
+        const reposResponse = await fetch(`https://api.github.com/users/Dzakiamriz22/repos`);
+        if (!reposResponse.ok) throw new Error('Network response was not ok');
         const reposData = await reposResponse.json();
-        setRepos(reposData);
+        
+        // Extract languages from each repository
+        const languageCount = {};
+        for (const repo of reposData) {
+          if (repo.language) {
+            languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
+          }
+        }
+
+        // Sort languages by usage and take the top 5 or so
+        const sortedLanguages = Object.keys(languageCount).sort((a, b) => languageCount[b] - languageCount[a]);
+        setSkills(sortedLanguages.slice(0, 5)); // Get top 5 languages
+
       } catch (err) {
         setError('Error fetching data from GitHub');
       } finally {
@@ -30,98 +45,127 @@ const ProfilePage = () => {
     fetchGitHubData();
   }, []);
 
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const toggleDarkMode = () => setDarkMode((prevMode) => !prevMode);
 
   const themeClasses = darkMode
-    ? 'bg-gradient-to-br from-purple-900 via-indigo-900 to-black text-gray-100'
-    : 'bg-gradient-to-br from-pink-200 via-yellow-300 to-blue-200 text-gray-900';
+    ? 'bg-gray-900 text-gray-200'
+    : 'bg-gray-50 text-gray-800';
 
   const cardClasses = darkMode
-    ? 'bg-opacity-80 backdrop-blur-lg bg-gray-900 text-gray-100 border border-gray-700 shadow-2xl'
-    : 'bg-opacity-90 backdrop-blur-lg bg-white text-gray-800 shadow-xl border border-gray-300';
+    ? 'bg-gray-800 text-white border border-gray-700'
+    : 'bg-white text-gray-900 border border-gray-300';
 
-  const textClasses = darkMode ? 'text-gray-300' : 'text-gray-800';
-
-  if (loading) return <p className="text-center text-xl text-gray-500">Loading...</p>;
-  if (error) return <p className="text-red-500 text-center text-xl">{error}</p>;
+  if (loading) return <Loading />;
+  if (error) return <ErrorMessage message={error} />;
 
   return (
     <div className={`p-6 min-h-screen ${themeClasses} transition-all duration-500`}>
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200"
-        >
-          <FaArrowLeft className="mr-2" /> Back
-        </button>
-        <button
-          onClick={toggleDarkMode}
-          className="flex items-center bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-100 px-4 py-2 rounded-full shadow-lg hover:scale-105 transform transition-all duration-200"
-        >
-          {darkMode ? <FaSun className="mr-2" /> : <FaMoon className="mr-2" />}
-          {darkMode ? 'Light Mode' : 'Dark Mode'}
-        </button>
-      </div>
-
-      {profile && (
-        <div className={`${cardClasses} rounded-2xl p-8 mb-10 transition-all duration-500`}>
-          <div className="flex items-center space-x-4 mb-6">
-            <FaGithub size={50} className={darkMode ? "text-gray-800 dark:text-gray-100" : "text-gray-900"} />
-            <h1 className="text-4xl font-extrabold">{profile.name}</h1>
-          </div>
-          <p className={`text-lg font-light ${textClasses} mb-4`}>{profile.bio}</p>
-          <div className="mt-4 space-y-2">
-            <p className={`flex items-center text-lg ${textClasses}`}>
-              <FaMapMarkerAlt className="mr-2" /> {profile.location || 'Location not specified'}
-            </p>
-            <p className={`text-lg ${textClasses}`}>
-              <strong className="font-semibold">Followers:</strong> {profile.followers}
-            </p>
-            <p className={`text-lg ${textClasses}`}>
-              <strong className="font-semibold">Following:</strong> {profile.following}
-            </p>
-            <p className={`text-lg ${textClasses}`}>
-              <strong className="font-semibold">Public Repos:</strong> {profile.public_repos}
-            </p>
-            <a
-              href={profile.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              View GitHub Profile
-            </a>
-          </div>
-        </div>
-      )}
-
-      <h2 className="text-3xl font-semibold text-gray-300 mb-6">Repositories</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {repos.map(repo => (
-          <div
-            key={repo.id}
-            className={`${cardClasses} rounded-2xl p-6 transition-transform transform hover:scale-105 cursor-pointer`}
-            onClick={() => window.open(repo.html_url, '_blank')}
-          >
-            <h3 className="font-semibold text-xl text-gradient bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent hover:underline">
-              {repo.name}
-            </h3>
-            <p className={`text-gray-600 dark:text-gray-300 mt-2 mb-4 ${textClasses}`}>
-              {repo.description || 'No description available'}
-            </p>
-            <div className="flex space-x-4">
-              <span className="flex items-center bg-green-200 text-green-600 dark:bg-green-500 dark:text-green-100 text-xs font-semibold px-3 py-1 rounded-full">
-                <FaStar className="mr-1" /> {repo.stargazers_count}
-              </span>
-              <span className="flex items-center bg-yellow-200 text-yellow-600 dark:bg-yellow-500 dark:text-yellow-100 text-xs font-semibold px-3 py-1 rounded-full">
-                <FaCodeBranch className="mr-1" /> {repo.forks_count}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
+      <Header navigate={navigate} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
+      {profile && <ProfileDetails profile={profile} cardClasses={cardClasses} darkMode={darkMode} skills={skills} />}
     </div>
   );
 };
+
+const Header = ({ navigate, toggleDarkMode, darkMode }) => (
+  <div className="flex items-center justify-between mb-6">
+    <button
+      onClick={() => navigate(-1)}
+      className="flex items-center bg-blue-600 text-white h-10 px-4 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300"
+    >
+      <FaArrowLeft className="mr-2" /> Back
+    </button>
+    <button
+      onClick={toggleDarkMode}
+      className={`flex items-center h-10 px-4 rounded-lg shadow-lg transition-all duration-300 ${darkMode ? 'bg-yellow-400 text-gray-800' : 'bg-gray-300 text-gray-800'}`}
+    >
+      {darkMode ? <FaSun className="mr-2" /> : <FaMoon className="mr-2" />}
+      {darkMode ? 'Light Mode' : 'Dark Mode'}
+    </button>
+  </div>
+);
+
+const ProfileDetails = ({ profile, cardClasses, darkMode, skills }) => (
+  <div className={`${cardClasses} rounded-2xl p-8 mb-10 transition-all duration-500 shadow-lg`}>
+    <div className="flex items-center space-x-4 mb-4">
+      <img 
+        src={profile.avatar_url} 
+        alt={`${profile.name}'s profile`} 
+        className="w-24 h-24 rounded-full border-4 border-gray-300" 
+      />
+      <div>
+        <h1 className="text-4xl font-bold">{profile.name}</h1>
+        <p className={`text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-800'} mb-2`}>
+          {profile.bio || 'No bio available'}
+        </p>
+      </div>
+    </div>
+    <ProfileInfo profile={profile} darkMode={darkMode} />
+    <SkillTags skills={skills} darkMode={darkMode} />
+    <SocialLinks profileUrl={profile.html_url} />
+  </div>
+);
+
+const ProfileInfo = ({ profile, darkMode }) => (
+  <div className="mt-2 space-y-2">
+    <InfoItem icon={<FaMapMarkerAlt />} text={profile.location || 'Location not specified'} darkMode={darkMode} />
+    <InfoItem label="Followers" text={profile.followers} darkMode={darkMode} />
+    <InfoItem label="Following" text={profile.following} darkMode={darkMode} />
+    <InfoItem label="Public Repos" text={profile.public_repos} darkMode={darkMode} />
+  </div>
+);
+
+const InfoItem = ({ icon, label, text, darkMode }) => (
+  <p className={`flex items-center text-lg ${darkMode ? 'text-gray-300' : 'text-gray-800'} transition-all duration-300`}>
+    {icon && <span className="mr-2">{icon}</span>}
+    {label && <strong className="font-semibold">{label}:</strong>} {text}
+  </p>
+);
+
+const SkillTags = ({ skills, darkMode }) => (
+  <div className="flex flex-wrap mt-4 space-x-2">
+    {skills.map((skill) => (
+      <span key={skill} className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'}`}>
+        {skill}
+      </span>
+    ))}
+  </div>
+);
+
+const SocialLinks = ({ profileUrl }) => (
+  <div className="flex space-x-4 mt-6 flex-wrap">
+    <a
+      href={profileUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center bg-blue-600 text-white h-10 px-4 rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mb-2"
+    >
+      <FaGithub className="mr-2" /> View GitHub Profile
+    </a>
+    <a
+      href="https://www.instagram.com/dzakiamriz_"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center bg-pink-600 text-white h-10 px-4 rounded-lg shadow hover:bg-pink-500 transition-all duration-300 mb-2"
+    >
+      <FaInstagram className="mr-2" /> Instagram
+    </a>
+    <a
+      href="https://www.linkedin.com/in/dzakiamriz/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center bg-blue-700 text-white h-10 px-4 rounded-lg shadow hover:bg-blue-600 transition-all duration-300 mb-2"
+    >
+      <FaLinkedin className="mr-2" /> LinkedIn
+    </a>
+  </div>
+);
+
+const Loading = () => (
+  <p className="text-center text-xl text-gray-500">Loading...</p>
+);
+
+const ErrorMessage = ({ message }) => (
+  <p className="text-red-500 text-center text-xl">{message}</p>
+);
 
 export default ProfilePage;
