@@ -8,11 +8,12 @@ function PrayerTimes() {
   const [countdown, setCountdown] = useState('');
   const [location, setLocation] = useState('');
   const [qiblaDirection, setQiblaDirection] = useState(0);
-  
+  const [deviceOrientation, setDeviceOrientation] = useState(0); // Store device orientation for real-time Qibla direction
+
   useEffect(() => {
     const getLocationAndFetchPrayerTimes = async () => {
       if (navigator.geolocation) {
-        // Request user's location
+        // Request location permission immediately when the app opens
         navigator.geolocation.getCurrentPosition(
           async (position) => {
             const { latitude, longitude } = position.coords;
@@ -35,7 +36,7 @@ function PrayerTimes() {
             }
           },
           (error) => {
-            // Handle errors from getting location
+            // Handle geolocation errors
             switch (error.code) {
               case error.PERMISSION_DENIED:
                 setError('Location access denied. Please enable location access for accurate prayer times and Qibla direction.');
@@ -50,7 +51,7 @@ function PrayerTimes() {
                 setError('An unknown error occurred.');
                 break;
               default:
-                setError('An unexpected error occurred.'); // Added default case
+                setError('An unexpected error occurred.');
                 break;
             }
             setLoading(false);
@@ -129,8 +130,17 @@ function PrayerTimes() {
       return () => clearInterval(interval);
     };
 
+    const handleDeviceOrientation = (event) => {
+      setDeviceOrientation(event.alpha || 0);
+    };
+
     // Fetch initial data
     getLocationAndFetchPrayerTimes();
+
+    // Add device orientation event listener
+    window.addEventListener('deviceorientation', handleDeviceOrientation);
+
+    return () => window.removeEventListener('deviceorientation', handleDeviceOrientation);
   }, []);
 
   if (loading) return <p className="text-center">Loading...</p>;
@@ -151,7 +161,7 @@ function PrayerTimes() {
             src="/compass.png"
             alt="Compass"
             className="w-24 h-24"
-            style={{ transform: `rotate(${qiblaDirection}deg)`, transition: 'transform 0.5s' }}
+            style={{ transform: `rotate(${(qiblaDirection - deviceOrientation + 360) % 360}deg)`, transition: 'transform 0.5s' }}
           />
         </div>
       </div>
