@@ -25,18 +25,18 @@ const ProfilePage = () => {
         
         // Extract languages from each repository
         const languageCount = {};
-        for (const repo of reposData) {
+        reposData.forEach(repo => {
           if (repo.language) {
             languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
           }
-        }
+        });
 
         // Sort languages by usage and take the top 5 or so
         const sortedLanguages = Object.keys(languageCount).sort((a, b) => languageCount[b] - languageCount[a]);
         setSkills(sortedLanguages.slice(0, 5)); // Get top 5 languages
 
       } catch (err) {
-        setError('Error fetching data from GitHub');
+        setError('Error fetching data from GitHub. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -45,7 +45,7 @@ const ProfilePage = () => {
     fetchGitHubData();
   }, []);
 
-  const toggleDarkMode = () => setDarkMode((prevMode) => !prevMode);
+  const toggleDarkMode = () => setDarkMode(prev => !prev);
 
   const themeClasses = darkMode
     ? 'bg-gray-900 text-gray-200'
@@ -59,7 +59,7 @@ const ProfilePage = () => {
   if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className={`p-6 min-h-screen ${themeClasses} transition-all duration-500`}>
+    <div className={`p-6 min-h-screen ${themeClasses} transition-all duration-500 flex flex-col items-center`}>
       <Header navigate={navigate} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
       {profile && <ProfileDetails profile={profile} cardClasses={cardClasses} darkMode={darkMode} skills={skills} />}
     </div>
@@ -67,7 +67,7 @@ const ProfilePage = () => {
 };
 
 const Header = ({ navigate, toggleDarkMode, darkMode }) => (
-  <div className="flex items-center justify-between mb-6">
+  <div className="flex items-center justify-between mb-6 w-full max-w-lg">
     <button
       onClick={() => navigate(-1)}
       className="flex items-center bg-blue-600 text-white h-10 px-4 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300"
@@ -85,15 +85,15 @@ const Header = ({ navigate, toggleDarkMode, darkMode }) => (
 );
 
 const ProfileDetails = ({ profile, cardClasses, darkMode, skills }) => (
-  <div className={`${cardClasses} rounded-2xl p-8 mb-10 transition-all duration-500 shadow-lg`}>
-    <div className="flex items-center space-x-4 mb-4">
+  <div className={`${cardClasses} rounded-2xl p-8 mb-10 transition-all duration-500 shadow-lg w-full max-w-lg`}>
+    <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-4 mb-4">
       <img 
         src={profile.avatar_url} 
         alt={`${profile.name}'s profile`} 
-        className="w-24 h-24 rounded-full border-4 border-gray-300" 
+        className="w-24 h-24 rounded-full border-4 border-gray-300 mb-4 md:mb-0 transition-transform duration-300 hover:scale-105" 
       />
-      <div>
-        <h1 className="text-4xl font-bold">{profile.name}</h1>
+      <div className="text-center md:text-left">
+        <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
         <p className={`text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-800'} mb-2`}>
           {profile.bio || 'No bio available'}
         </p>
@@ -132,20 +132,20 @@ const SkillTags = ({ skills, darkMode }) => (
 );
 
 const SocialLinks = ({ profileUrl }) => (
-  <div className="flex space-x-4 mt-6 flex-wrap">
+  <div className="flex space-x-4 mt-6 w-full max-w-lg">
     <a
       href={profileUrl}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center bg-blue-600 text-white h-10 px-4 rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mb-2"
+      className="flex items-center justify-center bg-blue-600 text-white h-10 flex-1 rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mb-2"
     >
-      <FaGithub className="mr-2" /> View GitHub Profile
+      <FaGithub className="mr-2" /> Github
     </a>
     <a
       href="https://www.instagram.com/dzakiamriz_"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center bg-pink-600 text-white h-10 px-4 rounded-lg shadow hover:bg-pink-500 transition-all duration-300 mb-2"
+      className="flex items-center justify-center bg-pink-600 text-white h-10 flex-1 rounded-lg shadow hover:bg-pink-500 transition-all duration-300 mb-2"
     >
       <FaInstagram className="mr-2" /> Instagram
     </a>
@@ -153,7 +153,7 @@ const SocialLinks = ({ profileUrl }) => (
       href="https://www.linkedin.com/in/dzakiamriz/"
       target="_blank"
       rel="noopener noreferrer"
-      className="flex items-center justify-center bg-blue-700 text-white h-10 px-4 rounded-lg shadow hover:bg-blue-600 transition-all duration-300 mb-2"
+      className="flex items-center justify-center bg-blue-700 text-white h-10 flex-1 rounded-lg shadow hover:bg-blue-600 transition-all duration-300 mb-2"
     >
       <FaLinkedin className="mr-2" /> LinkedIn
     </a>
