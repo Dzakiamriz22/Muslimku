@@ -9,6 +9,7 @@ function PrayerTimes() {
   const [location, setLocation] = useState('');
   const [qiblaDirection, setQiblaDirection] = useState(0);
   const [deviceOrientation, setDeviceOrientation] = useState(0);
+  const [isCalibrated, setIsCalibrated] = useState(false);
 
   const kaabaLatitude = 21.4253; // Latitude of Kaaba
   const kaabaLongitude = 39.8262; // Longitude of Kaaba
@@ -128,9 +129,9 @@ function PrayerTimes() {
 
   useEffect(() => {
     const handleOrientation = (event) => {
-      // Adjust for various device orientations
-      const alpha = event.alpha !== null ? event.alpha : 0; // Ensure alpha is available
-      setDeviceOrientation(alpha); // Store the device orientation
+      if (event.alpha !== null) {
+        setDeviceOrientation(event.alpha); // Store the device orientation
+      }
     };
 
     window.addEventListener('deviceorientation', handleOrientation);
@@ -140,8 +141,14 @@ function PrayerTimes() {
     };
   }, []);
 
-  // Adjust the Qibla direction based on device orientation
-  const adjustedQiblaDirection = (qiblaDirection + deviceOrientation + 360) % 360;
+  // Adjust the Qibla direction based on device orientation and calibrate if needed
+  const adjustedQiblaDirection = isCalibrated 
+    ? (qiblaDirection - deviceOrientation + 360) % 360 
+    : qiblaDirection;
+
+  const handleCalibration = () => {
+    setIsCalibrated(true);
+  };
 
   if (loading) return <p className="text-center">Loading...</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
@@ -164,6 +171,9 @@ function PrayerTimes() {
             style={{ transform: `rotate(${adjustedQiblaDirection}deg)`, transition: 'transform 0.5s' }}
           />
         </div>
+        <button onClick={handleCalibration} className="mt-2 p-2 bg-green-500 text-white rounded">
+          Calibrate Compass
+        </button>
       </div>
 
       <div className="bg-white shadow-lg rounded-lg p-6">
