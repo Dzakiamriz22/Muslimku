@@ -31,9 +31,9 @@ const ProfilePage = () => {
           }
         });
 
-        // Sort languages by usage and take the top 5 or so
+        // Sort languages by usage and take the top 3
         const sortedLanguages = Object.keys(languageCount).sort((a, b) => languageCount[b] - languageCount[a]);
-        setSkills(sortedLanguages.slice(0, 5)); // Get top 5 languages
+        setSkills(sortedLanguages.slice(0, 3)); // Get top 3 languages
 
       } catch (err) {
         setError('Error fetching data from GitHub. Please try again later.');
@@ -70,7 +70,7 @@ const Header = ({ navigate, toggleDarkMode, darkMode }) => (
   <div className="flex items-center justify-between mb-6 w-full max-w-lg">
     <button
       onClick={() => navigate(-1)}
-      className="flex items-center bg-blue-600 text-white h-10 px-4 rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300"
+      className="flex items-center bg-green-700 text-white h-10 px-4 rounded-lg shadow-lg hover:bg-green-800 transition-all duration-300"
     >
       <FaArrowLeft className="mr-2" /> Back
     </button>
@@ -85,7 +85,7 @@ const Header = ({ navigate, toggleDarkMode, darkMode }) => (
 );
 
 const ProfileDetails = ({ profile, cardClasses, darkMode, skills }) => (
-  <div className={`${cardClasses} rounded-2xl p-8 mb-10 transition-all duration-500 shadow-lg w-full max-w-lg`}>
+  <div className={`${cardClasses} rounded-2xl p-6 mb-10 transition-all duration-500 shadow-lg w-full max-w-lg`}>
     <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-4 mb-4">
       <img 
         src={profile.avatar_url} 
@@ -93,8 +93,8 @@ const ProfileDetails = ({ profile, cardClasses, darkMode, skills }) => (
         className="w-24 h-24 rounded-full border-4 border-gray-300 mb-4 md:mb-0 transition-transform duration-300 hover:scale-105" 
       />
       <div className="text-center md:text-left">
-        <h1 className="text-3xl md:text-4xl font-bold">{profile.name}</h1>
-        <p className={`text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-800'} mb-2`}>
+        <h1 className="text-2xl md:text-3xl font-bold">{profile.name}</h1>
+        <p className={`text-md md:text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-800'} mb-2`}>
           {profile.bio || 'No bio available'}
         </p>
       </div>
@@ -115,7 +115,7 @@ const ProfileInfo = ({ profile, darkMode }) => (
 );
 
 const InfoItem = ({ icon, label, text, darkMode }) => (
-  <p className={`flex items-center text-lg ${darkMode ? 'text-gray-300' : 'text-gray-800'} transition-all duration-300`}>
+  <p className={`flex items-center text-md ${darkMode ? 'text-gray-300' : 'text-gray-800'} transition-all duration-300`}>
     {icon && <span className="mr-2">{icon}</span>}
     {label && <strong className="font-semibold">{label}:</strong>} {text}
   </p>

@@ -2,21 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import DoaList from '../components/DoaList';
 import ProfileButton from '../components/ProfileButton';
+import SearchBar from '../components/SearchBar';
 
 
 const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-function SearchBar({ searchTerm, setSearchTerm }) {
-  return (
-    <input
-      type="text"
-      placeholder="Cari Surah..."
-      value={searchTerm}
-      onChange={(e) => setSearchTerm(e.target.value)}
-      className="w-full p-4 border border-green-400 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600 transition duration-200 bg-white text-gray-800 placeholder-gray-400 shadow-md"
-    />
-  );
-}
 
 function PrayerTimes({ setNextWajibPrayer }) {
   const [loading, setLoading] = useState(true);
@@ -130,12 +119,12 @@ function Home() {
     surah.nama_latin.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (  
+  return (
     <div className="w-full max-w-5xl mx-auto p-6 bg-gradient-to-r from-green-50 to-white rounded-lg shadow-lg mb-20">
       <h1 className="text-4xl font-bold text-center mb-4 text-green-700">Muslimku</h1>
       <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Al-Quran</h2>
       
-      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} /> {/* Use the new SearchBar component */}
       <PrayerTimes setNextWajibPrayer={setNextWajibPrayer} />
 
       {nextWajibPrayer && (
@@ -159,18 +148,23 @@ function Home() {
       <h2 className="text-2xl font-semibold text-center mb-4 text-gray-800">Daftar Surah</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
         {filteredSurahs.map(surah => (
-          <Link to={`/surah/${surah.nomor}`} key={surah.nomor} className="bg-white shadow-md rounded-lg p-4 border border-green-200 transition-transform transform hover:scale-105 hover:shadow-lg">
-            <div className="flex flex-col items-start">
+          <Link 
+            to={`/surah/${surah.nomor}`} 
+            key={surah.nomor} 
+            className="bg-white shadow-lg rounded-lg p-6 border border-green-200 transition-transform transform hover:shadow-xl"
+          >
+            <div className="flex flex-col mb-4">
               <span className="text-xl font-semibold text-green-800">{surah.nama_latin}</span>
               <span className="text-xl font-semibold text-green-900 mt-1">{surah.nama}</span>
-              <span className="text-green-700 text-sm italic">{surah.arti}</span>
-              <span className="mt-2 text-sm text-gray-600">Nomor: {surah.nomor}</span>
+              <span className="text-green-700 text-sm italic mt-1">{surah.arti}</span>
+              <span className="mt-2 text-sm text-gray-600">Surah ke: <strong>{surah.nomor}</strong></span>
             </div>
-            <div className="mt-4 flex justify-between items-center">
-              <span className="text-sm text-gray-600 capitalize">{surah.tempat_turun}</span>
-              <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">Surah</span>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600 capitalize">
+                Tempat Turun: 
+                <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full ml-1">{surah.tempat_turun}</span>
+              </span>
             </div>
-            <p className="mt-2 text-gray-600 text-xs leading-relaxed">Penjelasan singkat atau info tambahan tentang Surah.</p>
           </Link>
         ))}
       </div>

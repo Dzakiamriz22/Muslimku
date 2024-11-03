@@ -44,9 +44,8 @@ function DoaList() {
             className="bg-white rounded-lg p-6 border border-gray-200 shadow hover:shadow-lg transition duration-300 ease-in-out transform hover:scale-105 relative overflow-hidden"
             aria-label={`Lihat doa: ${doa.judul}`}
           >
-            <h3 className="text-xl font-semibold text-green-700">{doa.judul}</h3>
+            <h3 className="text-md font-semibold text-green-700 text-center">{doa.judul}</h3>
             <div className="absolute inset-0 bg-green-50 opacity-30 transition-opacity duration-300 hover:opacity-0"></div>
-            <p className="mt-2 text-sm text-gray-600">Klik untuk membaca lebih lanjut.</p>
           </Link>
         ))}
       </div>
