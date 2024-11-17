@@ -122,7 +122,6 @@ function PrayerTimes() {
     getLocationAndFetchPrayerTimes();
 
     return () => {
-      // Clean up if needed (no event listeners anymore)
     };
   }, []);
 

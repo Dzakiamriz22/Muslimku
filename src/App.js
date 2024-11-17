@@ -26,7 +26,6 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} /> 
       </Routes>
 
-      {/* Conditionally render BottomNavigation if not on ProfilePage */}
       {location.pathname !== '/profile' && <BottomNavigation />}
     </div>
   );
