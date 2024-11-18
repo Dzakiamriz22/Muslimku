@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaGithub, FaMapMarkerAlt, FaArrowLeft, FaMoon, FaSun, FaInstagram, FaLinkedin } from 'react-icons/fa';
+import { FaGithub, FaArrowLeft, FaInstagram, FaLinkedin, FaWhatsapp, FaEnvelope } from 'react-icons/fa';
 
 const ProfilePage = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [darkMode, setDarkMode] = useState(false);
-  const [skills, setSkills] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,24 +15,6 @@ const ProfilePage = () => {
         if (!profileResponse.ok) throw new Error('Network response was not ok');
         const profileData = await profileResponse.json();
         setProfile(profileData);
-
-        // Fetch repositories to get languages used
-        const reposResponse = await fetch(`https://api.github.com/users/Dzakiamriz22/repos`);
-        if (!reposResponse.ok) throw new Error('Network response was not ok');
-        const reposData = await reposResponse.json();
-        
-        // Extract languages from each repository
-        const languageCount = {};
-        reposData.forEach(repo => {
-          if (repo.language) {
-            languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
-          }
-        });
-
-        // Sort languages by usage and take the top 3
-        const sortedLanguages = Object.keys(languageCount).sort((a, b) => languageCount[b] - languageCount[a]);
-        setSkills(sortedLanguages.slice(0, 3)); // Get top 3 languages
-
       } catch (err) {
         setError('Error fetching data from GitHub. Please try again later.');
       } finally {
@@ -45,119 +25,77 @@ const ProfilePage = () => {
     fetchGitHubData();
   }, []);
 
-  const toggleDarkMode = () => setDarkMode(prev => !prev);
-
-  const themeClasses = darkMode
-    ? 'bg-gray-900 text-gray-200'
-    : 'bg-gray-50 text-gray-800';
-
-  const cardClasses = darkMode
-    ? 'bg-gray-800 text-white border border-gray-700'
-    : 'bg-white text-gray-900 border border-gray-300';
-
   if (loading) return <Loading />;
   if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className={`p-6 min-h-screen ${themeClasses} transition-all duration-500 flex flex-col items-center`}>
-      <Header navigate={navigate} toggleDarkMode={toggleDarkMode} darkMode={darkMode} />
-      {profile && <ProfileDetails profile={profile} cardClasses={cardClasses} darkMode={darkMode} skills={skills} />}
+    <div className="p-6 min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center">
+      <Header navigate={navigate} />
+      {profile && <ProfileDetails profile={profile} />}
     </div>
   );
 };
 
-const Header = ({ navigate, toggleDarkMode, darkMode }) => (
+const Header = ({ navigate }) => (
   <div className="flex items-center justify-between mb-6 w-full max-w-lg">
     <button
       onClick={() => navigate(-1)}
-      className="flex items-center bg-green-700 text-white h-10 px-4 rounded-lg shadow-lg hover:bg-green-800 transition-all duration-300"
+      className="flex items-center bg-transparent text-gray-900 border border-gray-900 h-10 px-4 rounded-lg shadow-md hover:bg-gray-100 transition-all duration-300"
     >
       <FaArrowLeft className="mr-2" /> Back
-    </button>
-    <button
-      onClick={toggleDarkMode}
-      className={`flex items-center h-10 px-4 rounded-lg shadow-lg transition-all duration-300 ${darkMode ? 'bg-yellow-400 text-gray-800' : 'bg-gray-300 text-gray-800'}`}
-    >
-      {darkMode ? <FaSun className="mr-2" /> : <FaMoon className="mr-2" />}
-      {darkMode ? 'Light Mode' : 'Dark Mode'}
     </button>
   </div>
 );
 
-const ProfileDetails = ({ profile, cardClasses, darkMode, skills }) => (
-  <div className={`${cardClasses} rounded-2xl p-6 mb-10 transition-all duration-500 shadow-lg w-full max-w-lg`}>
-    <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-4 mb-4">
+const ProfileDetails = ({ profile }) => (
+  <div className="bg-white text-gray-800 border border-gray-300 rounded-lg p-6 shadow-xl w-full max-w-lg">
+    <div className="flex flex-col items-center mb-4">
       <img 
         src={profile.avatar_url} 
         alt={`${profile.name}'s profile`} 
-        className="w-24 h-24 rounded-full border-4 border-gray-300 mb-4 md:mb-0 transition-transform duration-300 hover:scale-105" 
+        className="w-32 h-32 rounded-full border-4 border-gray-300 mb-4" 
       />
-      <div className="text-center md:text-left">
-        <h1 className="text-2xl md:text-3xl font-bold">{profile.name}</h1>
-        <p className={`text-md md:text-lg font-medium ${darkMode ? 'text-gray-300' : 'text-gray-800'} mb-2`}>
-          {profile.bio || 'No bio available'}
-        </p>
-      </div>
+      <h1 className="text-3xl font-semibold text-gray-900">{profile.name}</h1>
+      <p className="text-sm text-gray-600 mt-1">{profile.company || 'No company specified'}</p>
     </div>
-    <ProfileInfo profile={profile} darkMode={darkMode} />
-    <SkillTags skills={skills} darkMode={darkMode} />
+
+    <div className="grid grid-cols-2 gap-4 text-center mt-6 text-sm text-gray-600">
+      <InfoItem label="Repos" value={profile.public_repos} />
+      <InfoItem label="Followers" value={profile.followers} />
+      <InfoItem label="Following" value={profile.following} />
+      <InfoItem label="Joined" value={new Date(profile.created_at).toLocaleDateString()} />
+    </div>
+
     <SocialLinks profileUrl={profile.html_url} />
   </div>
 );
 
-const ProfileInfo = ({ profile, darkMode }) => (
-  <div className="mt-2 space-y-2">
-    <InfoItem icon={<FaMapMarkerAlt />} text={profile.location || 'Location not specified'} darkMode={darkMode} />
-    <InfoItem label="Followers" text={profile.followers} darkMode={darkMode} />
-    <InfoItem label="Following" text={profile.following} darkMode={darkMode} />
-    <InfoItem label="Public Repos" text={profile.public_repos} darkMode={darkMode} />
-  </div>
-);
-
-const InfoItem = ({ icon, label, text, darkMode }) => (
-  <p className={`flex items-center text-md ${darkMode ? 'text-gray-300' : 'text-gray-800'} transition-all duration-300`}>
-    {icon && <span className="mr-2">{icon}</span>}
-    {label && <strong className="font-semibold">{label}:</strong>} {text}
-  </p>
-);
-
-const SkillTags = ({ skills, darkMode }) => (
-  <div className="flex flex-wrap mt-4 space-x-2">
-    {skills.map((skill) => (
-      <span key={skill} className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${darkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-200 text-gray-800'}`}>
-        {skill}
-      </span>
-    ))}
+const InfoItem = ({ label, value }) => (
+  <div className="flex flex-col items-center">
+    <span className="text-lg font-semibold text-gray-900">{value}</span>
+    <span className="text-xs text-gray-500">{label}</span>
   </div>
 );
 
 const SocialLinks = ({ profileUrl }) => (
-  <div className="flex space-x-4 mt-6 w-full max-w-lg">
-    <a
-      href={profileUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-center bg-blue-600 text-white h-10 flex-1 rounded-lg shadow hover:bg-blue-700 transition-all duration-300 mb-2"
-    >
-      <FaGithub className="mr-2" /> Github
-    </a>
-    <a
-      href="https://www.instagram.com/dzakiamriz_"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-center bg-pink-600 text-white h-10 flex-1 rounded-lg shadow hover:bg-pink-500 transition-all duration-300 mb-2"
-    >
-      <FaInstagram className="mr-2" /> Instagram
-    </a>
-    <a
-      href="https://www.linkedin.com/in/dzakiamriz/"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center justify-center bg-blue-700 text-white h-10 flex-1 rounded-lg shadow hover:bg-blue-600 transition-all duration-300 mb-2"
-    >
-      <FaLinkedin className="mr-2" /> LinkedIn
-    </a>
+  <div className="flex space-x-6 mt-6 justify-center">
+    <SocialLink href="https://wa.me/62895361078490" icon={<FaWhatsapp />} />
+    <SocialLink href="mailto:dzakiamriz12@gmail.com" icon={<FaEnvelope />} />
+    <SocialLink href={profileUrl} icon={<FaGithub />} />
+    <SocialLink href="https://www.instagram.com/dzakiamriz_" icon={<FaInstagram />} />
+    <SocialLink href="https://www.linkedin.com/in/dzakiamriz/" icon={<FaLinkedin />} />
   </div>
+);
+
+const SocialLink = ({ href, icon }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-gray-700 h-10 w-10 rounded-full flex items-center justify-center hover:text-gray-900 hover:bg-gray-100 shadow-md transition-all duration-300 transform hover:scale-110"
+  >
+    {icon}
+  </a>
 );
 
 const Loading = () => (
